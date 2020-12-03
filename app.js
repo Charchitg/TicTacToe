@@ -15,10 +15,12 @@ let circle_turn
 
 const cellElements = document.querySelectorAll('[data-cell]');
 const board = document.getElementById('board');
-const winningmsg = document.querySelector('[data-winning-message-text]');
-const winningmsgelement = document.getElementsByClassName('winning-message');
-startGame();
+const restart = document.getElementById('restart');
+const winning_message_text = document.querySelector('[ data-winning-message-text ]');
+const winning_message = document.getElementById('winning-message');
 
+
+startGame();
 
 function startGame(){
     circle_turn = false;    
@@ -28,21 +30,36 @@ cellElements.forEach((cell) =>{
  addboardhovereffect();
 }
 
+restart.addEventListener('click' , restartgame);
+
+function restartgame(){
+    winning_message.classList.remove('show');
+    cellElements.forEach( (cell) =>{
+      cell.classList.remove(x_class);
+      cell.classList.remove(circle_class);
+      cell.removeEventListener('click' , handleclick);
+    });
+    startGame();
+}
 
 function handleclick(e){
  const cell = e.target;
- console.log(cell);
  const currentclass = circle_turn ? circle_class : x_class;
  // place mark
  placemark( cell , currentclass);
- if(Checkwin(currentclass)){
-    endgame(false);
- }
  // check for win
+ if(checkwin(currentclass)){
+     endgame(false);
+ }
  // check for ties
+ else if(isdraw()){
+    endgame(true);
+ }
  //swap turns
- swapturns();
- addboardhovereffect();
+ else{
+    swapturns();
+    addboardhovereffect();
+ } 
 }
 
 function placemark(cell , currentclass){
@@ -51,6 +68,22 @@ function placemark(cell , currentclass){
 
 function swapturns(){
     circle_turn = !circle_turn;
+}
+
+function isdraw(){
+    return [...cellElements].every(cell =>{
+        return cell.classList.contains(x_class) || cell.classList.contains(circle_class);
+    });
+}
+
+function endgame(draw){
+    if(draw){
+       winning_message_text.innerHTML = "Match Draw!";
+    }
+    else{
+       winning_message_text.innerHTML = `${circle_turn ? "O's" : "X's"} Win's!!!!!!!`;
+    }
+    winning_message.classList.add('show');
 }
 
 function addboardhovereffect(){
@@ -64,20 +97,10 @@ function addboardhovereffect(){
   }
 }
 
-function Checkwin(current_class){
-    return winning.some(combination =>{
-        return combination.every(index =>{
-            return cellElements[index].classList.contains(current_class);
+function checkwin(currentclass){
+    return winning.some(combinations =>{
+        return combinations.every( index =>{
+            return cellElements[index].classList.contains(currentclass);
         });
     });
-}; 
-
-function endgame(draw){
-    if(draw){
-
-    }
-    else{
-      winningmsg.innerText = ` ${circle_turn ? "O's" : "X's"} Wins!!`;
-    }
-     winningmsgelement.classList.add('show');   
 }
